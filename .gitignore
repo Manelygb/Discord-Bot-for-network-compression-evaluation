@@ -1,0 +1,30 @@
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.env/
+env/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+*.so
+
+# Logs, temporary files
+*.log
+
+# IDE / editor directories
+.vscode/
+.idea/
+
+# Test / coverage / pytest / mypy caches
+.pytest_cache/
+.mypy_cache/
+
+# OS files
+.DS_Store
