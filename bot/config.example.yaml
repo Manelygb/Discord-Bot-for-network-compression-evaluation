@@ -1,0 +1,12 @@
+# bot/config.example.yaml
+discord:
+  token: null                               # bot token from Discord Developer Portal        
+  guild_id: 123456789012345678           
+
+evaluation:
+  api_url: "http://localhost:8000/evaluate"  # evaluation service URL (container will run this)
+  timeout_seconds: 500                        # time to wait for POST call
+submissions:
+  dir: "../submissions"                  # where to save uploaded models
+  allowed_extensions: [".pt", ".pth", ".onnx", ".tflite", ".zip"]
+  max_file_size_mb: 5tset00                  # limit upload size
