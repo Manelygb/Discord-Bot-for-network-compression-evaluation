@@ -41,7 +41,15 @@ timeout_seconds = config["evaluation"].get("timeout_seconds", 300)
 
 SUBMISSIONS_DIR = pathlib.Path(config["submissions"].get("dir", "../submissions")).expanduser()
 ALLOWED_EXTS = set(config["submissions"].get("allowed_extensions", [".pt", ".pth", ".onnx", ".tflite", ".zip"]))
-MAX_FILE_SIZE_MB = config["submissions"].get("max_file_size_mb", 200)
+
+# Ensure MAX_FILE_SIZE_MB is an int (defensive)
+_default_max = 200
+_raw_max = config["submissions"].get("max_file_size_mb", _default_max)
+try:
+    MAX_FILE_SIZE_MB = int(_raw_max)
+except Exception:
+    logger.warning("Invalid max_file_size_mb in config (value=%r). Falling back to %d MB.", _raw_max, _default_max)
+    MAX_FILE_SIZE_MB = _default_max
 
 SUBMISSIONS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -90,10 +98,11 @@ async def download_url_to_path(url: str, dest_path: pathlib.Path, session: aioht
     """
     Download URL (streaming) into dest_path.
     Returns dict: {"ok": True} or {"ok": False, "error": "..."}
+
     Checks Content-Length vs MAX_FILE_SIZE_MB when header is present.
     """
     try:
-        async with session.get(url, timeout= aiohttp.ClientTimeout(total=timeout_seconds)) as resp:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=timeout_seconds)) as resp:
             if resp.status != 200:
                 return {"ok": False, "error": f"Download failed: HTTP {resp.status}"}
 
@@ -106,7 +115,8 @@ async def download_url_to_path(url: str, dest_path: pathlib.Path, session: aioht
                     if cl_int > max_bytes:
                         return {"ok": False, "error": f"File too large ({cl_int/(1024*1024):.1f} MB). Max allowed is {MAX_FILE_SIZE_MB} MB."}
                 except Exception:
-                    pass
+                    # ignore header parsing errors, continue streaming but we'll check final size
+                    logger.debug("Failed to parse Content-Length header: %r", cl)
 
             # stream to file
             dest_path.parent.mkdir(parents=True, exist_ok=True)
@@ -158,7 +168,7 @@ async def submit(ctx, *, description: str = ""):
         # If send fails (e.g., cannot send in channel), try DM
         try:
             await ctx.author.send(prompt)
-        except Exception as e:
+        except Exception:
             logger.exception("Failed to prompt user for link")
             return
 
