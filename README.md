@@ -10,20 +10,3 @@ Participants submit their “optimized/compressed model”, and the bot evaluate
 - inference time (on standard input / benchmark data)  
 
 The evaluation is done inside a Docker container to ensure uniform, reproducible environment.
-
-##  Project Layout (initial)
-
-├── README.md
-├── .gitignore
-├── .dockerignore
-├── docker/
-│ └── Dockerfile
-├── bot/
-│ ├── bot.py
-│ └── config.example.yaml
-├── evaluation/
-│ ├── measure.py
-│ └── (other modules as needed)
-├── examples/
-│ └── dummy_model.py
-└── requirements.txt
